@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Meijer Shift Handoff — Store 260</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.0/tesseract.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap');
+
+  :root {
+    --red: #dc2626;
+    --rose: #f43f5e;
+    --red-light: #fff1f2;
+    --red-mid: #fecdd3;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --white: #ffffff;
+    --radius: 16px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: radial-gradient(circle at top, rgba(254,226,226,0.55), transparent 28%), linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+    min-height: 100vh;
+    color: var(--slate-900);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 16px; }
+
+  /* HEADER */
+  .header-card {
+    background: rgba(255,255,255,0.97);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 20px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .header-logo {
+    width: 56px; height: 56px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #dc2626, #f43f5e, #fb923c);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 22px; font-weight: 900;
+    box-shadow: 0 4px 20px rgba(220,38,38,0.3);
+    flex-shrink: 0;
+  }
+
+  .header-text .eyebrow {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--rose);
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .header-text h1 {
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 700;
+    color: var(--slate-900);
+    letter-spacing: -0.5px;
+  }
+
+  .header-text p {
+    color: var(--slate-500);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  .header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px;
+    border-radius: var(--radius);
+    font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; border: 1.5px solid var(--slate-300);
+    background: var(--white); color: var(--slate-800);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--slate-50); border-color: var(--slate-400); }
+  .btn-primary {
+    background: var(--red); color: white; border-color: var(--red);
+    box-shadow: 0 4px 16px rgba(220,38,38,0.25);
+  }
+  .btn-primary:hover { background: #b91c1c; border-color: #b91c1c; }
+  .btn-dark { background: var(--slate-900); color: white; border-color: var(--slate-900); }
+  .btn-dark:hover { background: var(--slate-700); }
+  .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* LAYOUT */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1.12fr 0.88fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; } }
+
+  /* CARD */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    border: 1.5px solid var(--slate-200);
+    box-shadow: var(--shadow);
+  }
+  .card-inner { padding: 20px; }
+  .card-gradient { background: linear-gradient(135deg, white 0%, #f8fafc 100%); }
+  .card-red { background: linear-gradient(135deg, #fff1f2 0%, white 100%); }
+
+  /* TABS */
+  .tabs-wrapper { padding: 20px 20px 0; }
+  .tabs-header { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .tabs-sub { color: var(--slate-500); font-size: 13px; margin-bottom: 14px; }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    background: var(--slate-100);
+    border-radius: var(--radius-lg);
+    padding: 6px;
+  }
+
+  @media (max-width: 600px) {
+    .tabs { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .tab-btn {
+    border: none; background: transparent;
+    padding: 8px 6px;
+    border-radius: var(--radius);
+    font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; color: var(--slate-600);
+    transition: all 0.15s ease;
+  }
+  .tab-btn.active {
+    background: white;
+    color: var(--slate-900);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    font-weight: 600;
+  }
+  .tab-btn:hover:not(.active) { color: var(--slate-900); }
+
+  .tab-content { display: none; padding: 16px 20px 20px; }
+  .tab-content.active { display: block; }
+
+  /* FORM ELEMENTS */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--slate-700);
+    margin-bottom: 5px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  .input, .select, .textarea {
+    width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+    border: 1.5px solid var(--slate-300);
+    border-radius: var(--radius);
+    background: white; color: var(--slate-900);
+    outline: none; transition: border-color 0.15s;
+  }
+  .input:focus, .select:focus, .textarea:focus { border-color: var(--slate-600); }
+  .input { height: 42px; padding: 0 12px; }
+  .select { height: 42px; padding: 0 10px; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+  }
+  .textarea { padding: 10px 12px; min-height: 90px; resize: vertical; }
+
+  .toggle-label {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--slate-200);
+    background: var(--slate-50);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .toggle-label:hover { border-color: var(--slate-400); }
+  .toggle-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--red); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .grid-time { display: grid; grid-template-columns: 200px 1fr; gap: 12px; }
+
+  @media (max-width: 700px) {
+    .grid-2, .grid-3, .grid-4, .grid-time { grid-template-columns: 1fr; }
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .section-icon {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 12px;
+    background: var(--red-light);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--red);
+  }
+  .section-icon svg { width: 18px; height: 18px; }
+  .section-title .eyebrow {
+    font-family: 'Playfair Display', serif;
+    font-style: italic; color: var(--rose);
+    font-size: 14px; line-height: 1;
+  }
+  .section-title h3 { font-size: 15px; font-weight: 700; color: var(--slate-900); }
+  .section-title p { font-size: 12px; color: var(--slate-500); margin-top: 1px; }
+
+  /* CHIP */
+  .chip {
+    background: var(--slate-50); border: 1.5px solid var(--slate-200);
+    border-radius: var(--radius); padding: 8px 12px;
+  }
+  .chip-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--slate-500); }
+  .chip-value { font-size: 13.5px; font-weight: 700; color: var(--slate-900); margin-top: 2px; }
+
+  /* TABLE */
+  .table-wrap { border-radius: var(--radius); border: 1.5px solid var(--slate-200); overflow: hidden; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { padding: 10px 10px; background: var(--slate-50); color: var(--slate-500); font-weight: 600;
+    text-align: left; border-bottom: 1.5px solid var(--slate-200); white-space: nowrap; }
+  td { padding: 6px 6px; border-bottom: 1px solid var(--slate-100); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  .td-empty td { padding: 16px; text-align: center; color: var(--slate-500); }
+
+  .td-btn {
+    width: 34px; height: 34px; border-radius: 10px;
+    border: 1.5px solid var(--slate-300); background: white;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--slate-600); transition: all 0.15s;
+  }
+  .td-btn:hover { background: #fff1f2; border-color: var(--rose); color: var(--rose); }
+  .td-btn svg { width: 14px; height: 14px; }
+
+  /* INNER CARD */
+  .inner-card {
+    border: 1.5px solid var(--slate-200); border-radius: var(--radius-lg);
+    padding: 16px; background: white; margin-bottom: 14px;
+  }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 28px 20px;
+    border: 2px dashed var(--slate-300);
+    border-radius: var(--radius-lg);
+    background: var(--slate-50);
+    text-align: center; cursor: pointer;
+    font-size: 13.5px; font-weight: 500; color: var(--slate-700);
+    transition: all 0.15s;
+  }
+  .upload-zone:hover { border-color: var(--red); color: var(--red); background: var(--red-light); }
+  .upload-zone svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .upload-zone input { display: none; }
+
+  /* BAY CARD */
+  .bay-card { border: 1.5px solid var(--slate-200); border-radius: var(--radius-lg); padding: 14px; }
+  .bay-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .bay-title { font-weight: 700; font-size: 14px; }
+  .bay-badge {
+    background: var(--slate-100); border-radius: 100px;
+    padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--slate-700);
+  }
+
+  /* STATUS BADGE */
+  .status-badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  }
+  .status-good { background: #dcfce7; color: #15803d; }
+  .status-followup { background: #fef9c3; color: #854d0e; }
+  .status-attention { background: #fee2e2; color: #b91c1c; }
+
+  /* PREVIEW PANEL */
+  .preview-card {
+    position: sticky; top: 16px;
+    background: white; border-radius: var(--radius-xl);
+    border: none; box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+  }
+  .preview-inner { padding: 20px; }
+  .preview-title { font-size: 18px; font-weight: 700; }
+  .preview-sub { font-size: 12px; color: var(--slate-500); }
+
+  .preview-box {
+    border: 1.5px solid var(--slate-200); border-radius: var(--radius-lg);
+    background: white; padding: 16px;
+    font-size: 13px; line-height: 1.6; color: var(--slate-800);
+    max-height: 400px; overflow-y: auto;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .rich-copy-box {
+    min-height: 200px; width: 100%;
+    border: 1.5px solid var(--slate-300);
+    border-radius: var(--radius-lg);
+    background: white; padding: 12px;
+    font-size: 13px; overflow: auto; color: var(--slate-800);
+  }
+
+  .plain-copy-box {
+    min-height: 160px; width: 100%;
+    border: 1.5px solid var(--slate-300);
+    border-radius: var(--radius-lg);
+    background: var(--slate-50); padding: 12px;
+    font-size: 12px; color: var(--slate-800);
+    resize: vertical; font-family: monospace;
+  }
+
+  .copy-label { font-size: 12px; font-weight: 600; color: var(--slate-700); margin-bottom: 5px; }
+  .copy-sub { font-size: 11px; color: var(--slate-500); margin-bottom: 8px; }
+  .divider { height: 1.5px; background: var(--slate-200); margin: 16px 0; }
+
+  .chips-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+
+  .error-box {
+    background: #fffbeb; border: 1.5px solid #fcd34d;
+    border-radius: var(--radius); padding: 10px 14px;
+    font-size: 12.5px; color: #92400e; margin-top: 12px;
+  }
+
+  /* FAB */
+  .fab-row {
+    position: fixed; bottom: 20px; right: 20px; z-index: 50;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  @media (min-width: 1280px) {
+    .fab-row { position: static; flex-direction: row; flex-wrap: wrap; margin-top: 14px; }
+  }
+
+  /* SEPARATOR */
+  .section-sep { margin: 16px 0; }
+
+  /* OCR STATUS */
+  .ocr-status {
+    background: var(--slate-50); border-radius: var(--radius);
+    padding: 10px 14px; font-size: 12.5px; color: var(--slate-600);
+  }
+
+  /* IMPORT NOTICE */
+  .import-chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 8px; }
+
+  /* SCROLL SMOOTH */
+  html { scroll-behavior: smooth; }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .tab-content.active { animation: fadeIn 0.2s ease; }
+
+  /* ATTACHMENT GRID */
+  .attachment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .attachment-item { border: 1.5px solid var(--slate-200); border-radius: var(--radius-lg); padding: 12px; }
+  .attachment-preview {
+    aspect-ratio: 16/9; border-radius: var(--radius); background: var(--slate-100);
+    overflow: hidden; margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .attachment-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .attachment-preview .no-preview { color: var(--slate-500); font-size: 12px; }
+
+  /* RECALL TABLE */
+  .recall-section { border: 1.5px solid var(--slate-200); border-radius: var(--radius-lg); padding: 14px; }
+  .recall-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .recall-title { font-size: 13px; font-weight: 700; }
+
+  /* METRIC TABLE td input */
+  td .input { height: 36px; font-size: 13px; }
+  td .select { height: 36px; font-size: 13px; }
+
+  /* SAVE INDICATOR */
+  .save-indicator {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 100px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.03em;
+    background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0;
+    transition: all 0.3s ease;
+  }
+  .save-indicator.saving {
+    background: #fefce8; color: #854d0e; border-color: #fde68a;
+  }
+  .save-indicator .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: currentColor; flex-shrink: 0;
+  }
+  .save-indicator.saving .dot {
+    animation: pulse-dot 0.8s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header-card">
+    <div style="display:flex;align-items:center;gap:16px;flex:1;min-width:0;">
+      <div class="header-logo">M</div>
+      <div class="header-text" style="min-width:0;">
+        <div class="eyebrow">shift notes, but better</div>
+        <h1>Meijer Shift Handoff</h1>
+        <p>Store 260 · Rebuilt with receiving logic, floor projects, smart import, and more.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div id="save-indicator" class="save-indicator"><div class="dot"></div><span id="save-text">Saved</span></div>
+      <button class="btn" onclick="applyPreset('normal')">Normal Close</button>
+      <button class="btn" onclick="applyPreset('busy')">Busy Close</button>
+      <button class="btn" onclick="applyPreset('problem')">Problem Close</button>
+      <button class="btn" onclick="resetAll()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: FORM -->
+    <div>
+      <div class="card" style="border:none;box-shadow:var(--shadow-lg);">
+        <div class="tabs-wrapper">
+          <div class="tabs-header">Shift Handoff Entry</div>
+          <div class="tabs-sub">Fill the form or use smart import from your screenshots.</div>
+          <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+            <button class="tab-btn" onclick="switchTab('import')">Smart Import</button>
+            <button class="tab-btn" onclick="switchTab('ops')">Operations</button>
+            <button class="tab-btn" onclick="switchTab('close')">Close</button>
+            <button class="tab-btn" onclick="switchTab('handoff')">Handoff</button>
+          </div>
+        </div>
+
+        <!-- ===== OVERVIEW TAB ===== -->
+        <div id="tab-overview" class="tab-content active">
+
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">the essentials</div>
+                  <h3>Shift Snapshot</h3>
+                  <p>Top line context for the handoff.</p>
+                </div>
+              </div>
+
+              <!-- Attendance table -->
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div style="font-size:13px;font-weight:700;">Attendance / Call Offs</div>
+                <button class="btn" onclick="addAttendanceRow()" style="padding:6px 12px;font-size:12px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                  Add Row
+                </button>
+              </div>
+              <div class="table-wrap" style="margin-bottom:12px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>Department</th>
+                      <th>Scheduled Shift</th>
+                      <th>FMLA</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="attendance-tbody">
+                    <tr class="td-empty"><td colspan="5">No attendance rows yet. Use the button above.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="field">
+                <label>Attendance Notes</label>
+                <textarea class="textarea" id="f-attendance" oninput="setField('attendance',this.value)" style="min-height:70px;" placeholder="Extra context not already in the table."></textarea>
+              </div>
+
+              <div class="grid-4">
+                <div class="field">
+                  <label>Date</label>
+                  <input class="input" id="f-date" oninput="setField('date',this.value)">
+                </div>
+                <div class="field">
+                  <label>Store</label>
+                  <input class="input" id="f-store" oninput="setField('store',this.value)">
+                </div>
+                <div class="field">
+                  <label>Closing Leader</label>
+                  <input class="input" id="f-closingLeader" oninput="setField('closingLeader',this.value)" placeholder="Name">
+                </div>
+                <div class="field">
+                  <label>Shift</label>
+                  <select class="select" id="f-shift" onchange="setField('shift',this.value)">
+                    <option>Closing</option><option>Mid</option><option>Open</option><option>Overnight</option><option>Other</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- METRICS -->
+          <div class="card card-gradient">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">just the useful numbers</div>
+                  <h3>Store Metrics</h3>
+                  <p>Use imported data or type manually.</p>
+                </div>
+              </div>
+              <div class="table-wrap" style="margin-bottom:10px;">
+                <table>
+                  <thead>
+                    <tr><th>Metric</th><th>Value</th><th>Last Updated</th><th></th></tr>
+                  </thead>
+                  <tbody id="metrics-tbody"></tbody>
+                </table>
+              </div>
+              <button class="btn" onclick="addMetricRow()" style="font-size:12px;padding:7px 14px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Add Metric
+              </button>
+              <div class="import-chips" style="margin-top:12px;" id="overview-chips"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== IMPORT TAB ===== -->
+        <div id="tab-import" class="tab-content">
+          <div class="card card-gradient">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3"/><path d="M9 12l2 2 4-4"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">smart helper</div>
+                  <h3>Import PowerBI / OSA Screenshot</h3>
+                  <p>Upload an image, run OCR, and auto-fill the useful fields.</p>
+                </div>
+              </div>
+
+              <label class="upload-zone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span id="import-label">Choose screenshot</span>
+                <input type="file" accept="image/*" onchange="handleImageUpload(event)">
+              </label>
+
+              <div class="ocr-status" style="margin-top:10px;" id="ocr-status">Upload your PowerBI or OSA screenshot here.</div>
+
+              <div class="field" style="margin-top:12px;">
+                <label>OCR / Extracted Text</label>
+                <textarea class="textarea" id="ocr-textarea" style="min-height:160px;" placeholder="OCR text will appear here. You can also paste copied report text manually." oninput="ocrText=this.value"></textarea>
+              </div>
+
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+                <button class="btn btn-dark" onclick="applyPastedText()">Apply Parsed Data</button>
+                <span style="font-size:12px;color:var(--slate-500);">Best results: upload screenshots one at a time.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== OPS TAB ===== -->
+        <div id="tab-ops" class="tab-content">
+
+          <div class="card card-red" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">call out the real problems</div>
+                  <h3>Operational Issues</h3>
+                  <p>Only the issues overnight actually needs to know.</p>
+                </div>
+              </div>
+              <textarea class="textarea" id="f-issues" oninput="setField('issues',this.value)" placeholder="Late trucks, blocked docks, equipment issues, heavy OOS concerns, etc."></textarea>
+            </div>
+          </div>
+
+          <!-- BAY STATUS -->
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">bay vision</div>
+                  <h3>Receiving / Bay Status</h3>
+                  <p>Structured bay status plus broader receiving handoff.</p>
+                </div>
+              </div>
+
+              <div id="bays-grid" class="grid-2" style="margin-bottom:14px;"></div>
+
+              <div class="grid-4" style="margin-bottom:14px;">
+                <div class="field">
+                  <label>Trailer Readiness</label>
+                  <select class="select" id="f-trailerReadiness" onchange="setField('trailerReadiness',this.value)">
+                    <option value="">Select</option><option>Ready</option><option>Not ready</option><option>Needs attention</option>
+                  </select>
+                  <input class="input" type="time" id="f-trailerReadinessTime" oninput="setField('trailerReadinessTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Hallway Area</label>
+                  <select class="select" id="f-hallwayArea" onchange="setField('hallwayArea',this.value)">
+                    <option>Produce / Frozen Hallway</option><option>Produce Hallway</option><option>Frozen Hallway</option><option>Back Hallway</option><option>Other</option>
+                  </select>
+                  <select class="select" id="f-hallwayStatus" onchange="setField('hallwayStatus',this.value)" style="margin-top:6px;">
+                    <option value="">Select</option><option>Clear</option><option>Partially blocked</option><option>Blocked</option>
+                  </select>
+                  <input class="input" type="time" id="f-hallwayTime" oninput="setField('hallwayTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Central Supply</label>
+                  <select class="select" id="f-centralSupplyStatus" onchange="setField('centralSupplyStatus',this.value)">
+                    <option value="">Select</option><option>Clean</option><option>Needs cleanup</option><option>Overflowing</option>
+                  </select>
+                  <input class="input" type="time" id="f-centralSupplyTime" oninput="setField('centralSupplyTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Pallet Truck</label>
+                  <select class="select" id="f-palletTruckStatus" onchange="setField('palletTruckStatus',this.value)">
+                    <option value="">Select</option><option>Available</option><option>Not available</option><option>Needs attention</option>
+                  </select>
+                  <input class="input" type="time" id="f-palletTruckTime" oninput="setField('palletTruckTime',this.value)" style="margin-top:6px;">
+                </div>
+              </div>
+
+              <div class="grid-2" style="margin-bottom:12px;">
+                <label class="toggle-label">
+                  <input type="checkbox" id="f-receivingClear" onchange="setField('receivingClear',this.checked)">
+                  Receiving clear for overnight truck
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="f-receivingIssues" onchange="setField('receivingIssues',this.checked)">
+                  Receiving issues noted
+                </label>
+              </div>
+
+              <div class="field">
+                <label>Dock / Bay Notes</label>
+                <textarea class="textarea" id="f-dockSummary" oninput="setField('dockSummary',this.value)" placeholder="Bay 1 GM LL, Bay 2 pallet trailer, Bay 3 empty, pallet build staged, etc."></textarea>
+              </div>
+              <div class="field">
+                <label>Receiving Notes</label>
+                <textarea class="textarea" id="f-receivingNotes" oninput="setField('receivingNotes',this.value)" placeholder="Anything unusual about the dock, pallets, hallway, or truck readiness."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottle / Baler / Dept99 -->
+          <div class="grid-3" style="margin-bottom:14px;">
+            <div class="card card-gradient">
+              <div class="card-inner">
+                <div class="section-title">
+                  <div class="section-icon" style="width:32px;height:32px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><rect x="1" y="3" width="15" height="13"/></svg>
+                  </div>
+                  <div><h3 style="font-size:13.5px;">Bottle Room</h3><p>Separate from baler.</p></div>
+                </div>
+                <div class="field">
+                  <label>Status</label>
+                  <select class="select" id="f-bottleRoomStatus" onchange="setField('bottleRoomStatus',this.value)">
+                    <option value="">Select</option><option>Closed</option><option>Trash removed</option><option>Bins full</option><option>Bottle truck full</option><option>Bottle truck arriving tonight</option>
+                  </select>
+                  <input class="input" type="time" id="f-bottleRoomTime" oninput="setField('bottleRoomTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Notes</label>
+                  <input class="input" id="f-bottleRoomNotes" oninput="setField('bottleRoomNotes',this.value)" placeholder="Optional note">
+                </div>
+              </div>
+            </div>
+            <div class="card card-gradient">
+              <div class="card-inner">
+                <div class="section-title">
+                  <div class="section-icon" style="width:32px;height:32px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><rect x="1" y="3" width="15" height="13"/></svg>
+                  </div>
+                  <div><h3 style="font-size:13.5px;">Baler</h3><p>Includes normal operation.</p></div>
+                </div>
+                <div class="field">
+                  <label>Status</label>
+                  <select class="select" id="f-balerStatus" onchange="setField('balerStatus',this.value)">
+                    <option value="">Select</option><option>Normal operation</option><option>Door open</option><option>Almost full</option><option>Just tied off</option><option>Bale pulled &amp; Door Closed</option>
+                  </select>
+                  <input class="input" type="time" id="f-balerTime" oninput="setField('balerTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Notes</label>
+                  <input class="input" id="f-balerNotes" oninput="setField('balerNotes',this.value)" placeholder="Optional note">
+                </div>
+              </div>
+            </div>
+            <div class="card card-gradient">
+              <div class="card-inner">
+                <div class="section-title">
+                  <div class="section-icon" style="width:32px;height:32px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><rect x="1" y="3" width="15" height="13"/></svg>
+                  </div>
+                  <div><h3 style="font-size:13.5px;">Compactor / Trash</h3><p>Trash flow status.</p></div>
+                </div>
+                <div class="field">
+                  <label>Status</label>
+                  <select class="select" id="f-dept99Status" onchange="setField('dept99Status',this.value)">
+                    <option value="">Select</option><option>All trash completed as of</option><option>Incomplete</option><option>Waiting for dumpster</option>
+                  </select>
+                  <input class="input" type="time" id="f-dept99Time" oninput="setField('dept99Time',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Notes</label>
+                  <input class="input" id="f-dept99Notes" oninput="setField('dept99Notes',this.value)" placeholder="Time or detail">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attachments -->
+          <div class="card card-gradient">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">visual context</div>
+                  <h3>Images / Attachments</h3>
+                  <p>Add images and notes for anything worth showing.</p>
+                </div>
+              </div>
+              <label class="upload-zone" style="margin-bottom:12px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Add images</span>
+                <input type="file" accept="image/*" multiple onchange="handleAttachmentUpload(event)">
+              </label>
+              <div id="attachments-grid" class="attachment-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CLOSE TAB ===== -->
+        <div id="tab-close" class="tab-content">
+
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">the feel of the building</div>
+                  <h3>Store Conditions</h3>
+                  <p>Keep only what matters to overnight.</p>
+                </div>
+              </div>
+              <div class="grid-3" style="margin-bottom:12px;">
+                <label class="toggle-label">
+                  <input type="checkbox" id="f-parkingLotClear" onchange="setField('parkingLotClear',this.checked)">
+                  Parking lot clear
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="f-cartCorralsClear" onchange="setField('cartCorralsClear',this.checked)">
+                  Cart corrals clear
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="f-gmCondition100" onchange="setField('gmCondition100',this.checked)">
+                  GM conditioned to 100%
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="f-groceryEndcapsConditioned" onchange="setField('groceryEndcapsConditioned',this.checked)">
+                  Grocery Endcaps / Center Aisle Conditioned
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="f-groceryWaterFilled" onchange="setField('groceryWaterFilled',this.checked)">
+                  Grocery Water Filled
+                </label>
+              </div>
+              <div class="grid-time">
+                <div class="field">
+                  <label>Condition Time</label>
+                  <input class="input" type="time" id="f-storeConditionTime" oninput="setField('storeConditionTime',this.value)">
+                </div>
+                <div class="field">
+                  <label>Store Condition Notes</label>
+                  <textarea class="textarea" id="f-storeConditionNotes" oninput="setField('storeConditionNotes',this.value)" style="min-height:70px;" placeholder="Add only meaningful condition notes."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">buttoned up</div>
+                  <h3>Closing Tasks Completed</h3>
+                  <p>Use this instead of a long paragraph.</p>
+                </div>
+              </div>
+              <div class="grid-3" style="margin-bottom:12px;">
+                <div class="field">
+                  <label>Closing Walk</label>
+                  <label class="toggle-label"><input type="checkbox" id="f-closingWalk" onchange="setField('closingWalk',this.checked)">Completed</label>
+                  <input class="input" type="time" id="f-closingWalkTime" oninput="setField('closingWalkTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>GM Doors</label>
+                  <label class="toggle-label"><input type="checkbox" id="f-gmDoorsLocked" onchange="setField('gmDoorsLocked',this.checked)">Locked and alarmed</label>
+                  <input class="input" type="time" id="f-gmDoorsLockedTime" oninput="setField('gmDoorsLockedTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Service Drawers</label>
+                  <label class="toggle-label"><input type="checkbox" id="f-serviceDrawersPulled" onchange="setField('serviceDrawersPulled',this.checked)">Pulled</label>
+                  <input class="input" type="time" id="f-serviceDrawersTime" oninput="setField('serviceDrawersTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Gas Station</label>
+                  <label class="toggle-label"><input type="checkbox" id="f-gasStationArmed" onchange="setField('gasStationArmed',this.checked)">Armed</label>
+                  <input class="input" type="time" id="f-gasStationTime" oninput="setField('gasStationTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Logile</label>
+                  <label class="toggle-label"><input type="checkbox" id="f-logileComplete" onchange="setField('logileComplete',this.checked)">Completed</label>
+                  <input class="input" type="time" id="f-logileTime" oninput="setField('logileTime',this.value)" style="margin-top:6px;">
+                </div>
+                <div class="field">
+                  <label>Smartsense</label>
+                  <label class="toggle-label"><input type="checkbox" id="f-smartsenseComplete" onchange="setField('smartsenseComplete',this.checked)">Completed</label>
+                  <input class="input" type="time" id="f-smartsenseTime" oninput="setField('smartsenseTime',this.value)" style="margin-top:6px;">
+                </div>
+              </div>
+              <div class="field">
+                <label>Closing Task Notes</label>
+                <textarea class="textarea" id="f-closingTaskNotes" oninput="setField('closingTaskNotes',this.value)" placeholder="Only if something unusual matters."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:14px;">
+            <div class="card card-gradient">
+              <div class="card-inner">
+                <div class="section-title">
+                  <div class="section-icon" style="width:32px;height:32px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  </div>
+                  <div>
+                    <div class="eyebrow">night work</div>
+                    <h3 style="font-size:13.5px;">Floor Projects</h3>
+                    <p>Waxing, stripping, overnight floor work.</p>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Projects Time</label>
+                  <input class="input" type="time" id="f-floorProjectsTime" oninput="setField('floorProjectsTime',this.value)">
+                </div>
+                <div class="field">
+                  <label>Projects</label>
+                  <textarea class="textarea" id="f-floorProjects" oninput="setField('floorProjects',this.value)" placeholder="Waxing in grocery aisle 4. Stripping in GM action alley."></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="card card-gradient">
+              <div class="card-inner">
+                <div class="section-title">
+                  <div class="section-icon" style="width:32px;height:32px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/></svg>
+                  </div>
+                  <div>
+                    <div class="eyebrow">recalls</div>
+                    <h3 style="font-size:13.5px;">Recall Status</h3>
+                    <p>Detailed table appears if needed.</p>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Recalls Complete?</label>
+                  <select class="select" id="f-recallsComplete" onchange="setField('recallsComplete',this.value);toggleRecallTable()">
+                    <option value="n-a">n-a</option><option value="yes">yes</option><option value="no">no</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Recall Summary</label>
+                  <input class="input" id="f-recallSummary" oninput="setField('recallSummary',this.value)" placeholder="Optional summary">
+                </div>
+                <div id="recall-section" style="display:none;">
+                  <div class="recall-section">
+                    <div class="recall-header">
+                      <div class="recall-title">Recall Log</div>
+                      <button class="btn" onclick="addRecall()" style="font-size:12px;padding:6px 12px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;"><path d="M12 5v14M5 12h14"/></svg>Add Row
+                      </button>
+                    </div>
+                    <div class="table-wrap">
+                      <table>
+                        <thead><tr><th>ID</th><th>Product</th><th>Dept</th><th>Action</th><th>By</th><th></th></tr></thead>
+                        <tbody id="recalls-tbody">
+                          <tr class="td-empty"><td colspan="6">No recall rows yet.</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MISSED SMARTSENSE - TABLE -->
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">exception tracking</div>
+                  <h3>Missed SmartSense</h3>
+                  <p>Add a row for each missed log. Empty table = excluded from report.</p>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div style="font-size:13px;font-weight:700;color:var(--slate-700);">Miss Log</div>
+                <button class="btn" onclick="addSmartSenseMiss()" style="font-size:12px;padding:6px 12px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;"><path d="M12 5v14M5 12h14"/></svg>Add Miss
+                </button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Location</th><th>Which Log / Reason</th><th></th></tr>
+                  </thead>
+                  <tbody id="smartsense-tbody">
+                    <tr class="td-empty"><td colspan="3">No missed SmartSense logs recorded.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- LOAD QUANTITIES -->
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">incoming product</div>
+                  <h3>Load Quantities</h3>
+                  <p>Frozen liveload pallets and produce incoming order info.</p>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Category</th><th>Details</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="white-space:nowrap;font-weight:600;color:var(--slate-700);">Frozen Liveload</td>
+                      <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                          <input class="input" id="f-frozenLiveloadPallets" oninput="setField('frozenLiveloadPallets',this.value)" placeholder="Pallet count" style="max-width:140px;">
+                          <span style="font-size:12px;color:var(--slate-500);">pallets</span>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="white-space:nowrap;font-weight:600;color:var(--slate-700);">Produce Incoming</td>
+                      <td>
+                        <input class="input" id="f-produceIncomingOrder" oninput="setField('produceIncomingOrder',this.value)" placeholder="Order amount / notes">
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- COMPLIANCE -->
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">standards</div>
+                  <h3>Compliance</h3>
+                  <p>Note any compliance items for overnight or next shift. Leave blank to exclude.</p>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div class="field">
+                  <label>Store Compliance</label>
+                  <textarea class="textarea" id="f-complianceStore" oninput="setField('complianceStore',this.value)" style="min-height:80px;" placeholder="Any store compliance notes..."></textarea>
+                </div>
+                <div class="field">
+                  <label>Gas Station Compliance</label>
+                  <textarea class="textarea" id="f-complianceGasStation" oninput="setField('complianceGasStation',this.value)" style="min-height:80px;" placeholder="Any gas station compliance notes..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- WORK ORDERS -->
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">maintenance</div>
+                  <h3>Work Orders</h3>
+                  <p>Log any work orders submitted tonight. N/A = excluded from report.</p>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div style="font-size:13px;font-weight:700;color:var(--slate-700);">Work Order Log</div>
+                <button class="btn" onclick="addWorkOrder()" style="font-size:12px;padding:6px 12px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px;"><path d="M12 5v14M5 12h14"/></svg>Add Work Order
+                </button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>WO #</th>
+                      <th>Department</th>
+                      <th>Description</th>
+                      <th>Priority</th>
+                      <th>Submitted By</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="workorders-tbody">
+                    <tr class="td-empty"><td colspan="6">No work orders yet. Click "Add Work Order" to log one.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===== HANDOFF TAB ===== -->
+        <div id="tab-handoff" class="tab-content">
+          <div class="card card-gradient" style="margin-bottom:14px;">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 2-1 4-4-1"/><path d="M3.9 16.1C2.7 13.4 3 10.1 5 7.7"/><path d="M20.1 7.9C21.3 10.6 21 13.9 19 16.3"/><path d="m3 22 1-4 4 1"/><path d="M7.9 20.1C10.6 21.3 13.9 21 16.3 19"/><path d="M16.1 3.9C13.4 2.7 10.1 3 7.7 5"/></svg>
+                </div>
+                <div>
+                  <div class="eyebrow">pass the torch</div>
+                  <h3>Handoff</h3>
+                  <p>Who has control of the building and when it changed hands.</p>
+                </div>
+              </div>
+              <div class="grid-3">
+                <div class="field">
+                  <label>Keys</label>
+                  <input class="input" id="f-keysPassedTo" oninput="setField('keysPassedTo',this.value)" placeholder="Name">
+                </div>
+                <div class="field">
+                  <label>611</label>
+                  <input class="input" id="f-phone611PassedTo" oninput="setField('phone611PassedTo',this.value)" placeholder="Name">
+                </div>
+                <div class="field">
+                  <label>Time Passed</label>
+                  <input class="input" type="time" id="f-timePassed" oninput="setField('timePassed',this.value)">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card card-gradient">
+            <div class="card-inner">
+              <div class="section-title">
+                <div class="section-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                </div>
+                <div>
+                  <h3>Follow Ups For Next Shift</h3>
+                  <p>Only the real action items.</p>
+                </div>
+              </div>
+              <div class="field">
+                <label>Follow Ups</label>
+                <textarea class="textarea" id="f-followUps" oninput="setField('followUps',this.value)" placeholder="Produce focus, overdue training reminders, dry stock, staged carts, etc."></textarea>
+              </div>
+              <div class="field">
+                <label>Additional Notes</label>
+                <textarea class="textarea" id="f-additionalNotes" oninput="setField('additionalNotes',this.value)" placeholder="Anything else worth noting."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end card -->
+    </div><!-- end left col -->
+
+    <!-- RIGHT: PREVIEW -->
+    <div>
+      <div class="preview-card card">
+        <div class="preview-inner">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;">
+            <div>
+              <div class="preview-title">Formatted Preview</div>
+              <div class="preview-sub">Outlook-safe output for email handoff.</div>
+            </div>
+            <div id="copy-status" style="background:var(--slate-100);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:700;color:var(--slate-700);white-space:nowrap;">Ready</div>
+          </div>
+
+          <div class="chips-row" id="preview-chips"></div>
+
+          <div class="preview-box" id="preview-box"></div>
+
+          <div class="divider"></div>
+
+          <div id="copy-error" style="display:none;" class="error-box"></div>
+
+          <div style="margin-bottom:12px;">
+            <div class="copy-label">Manual Rich Copy Box</div>
+            <div class="copy-sub">If your paste target strips formatting, place cursor inside the box, select all, and copy.</div>
+            <div id="rich-copy-box" class="rich-copy-box" contenteditable="true" onfocus="selectRichBox()"></div>
+          </div>
+
+          <div>
+            <div class="copy-label">Manual Plain Copy Box</div>
+            <textarea id="plain-copy-box" class="plain-copy-box" readonly onfocus="this.select()"></textarea>
+          </div>
+
+          <div class="fab-row">
+            <button class="btn btn-primary" id="copy-formatted-btn" onclick="copyFormatted()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Formatted
+            </button>
+            <button class="btn" id="copy-plain-btn" onclick="copyPlain()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy Plain
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main grid -->
+</div><!-- end container -->
+
+<script>
+// ==================== STATE ====================
+const makeId = () => Math.random().toString(36).slice(2, 10);
+const todayStr = new Date().toLocaleDateString('en-US');
+
+// Convert 24-hr HH:MM to 12-hr standard time
+function fmtTime(t) {
+  if (!t) return '';
+  const [hStr, mStr] = t.split(':');
+  let h = parseInt(hStr, 10);
+  const m = mStr || '00';
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${m} ${ampm}`;
+}
+
+let form = {
+  date: todayStr, store: '260', closingLeader: '', shift: 'Closing',
+  overallCloseStatus: 'Good', overallCloseNote: '',
+  salesValue: '', osa: '', topOosCount: '',
+  attendance: '', aiSummary: '', issues: '',
+  bottleRoomStatus: '', bottleRoomNotes: '', bottleRoomTime: '',
+  balerStatus: '', balerNotes: '', balerTime: '',
+  dept99Status: '', dept99Notes: '', dept99Time: '',
+  trailerReadiness: '', trailerReadinessTime: '',
+  hallwayArea: 'Produce / Frozen Hallway', hallwayStatus: '', hallwayTime: '',
+  centralSupplyStatus: '', centralSupplyTime: '',
+  palletTruckStatus: '', palletTruckTime: '',
+  dockSummary: '', receivingNotes: '', receivingClear: false, receivingIssues: false,
+  parkingLotClear: false, cartCorralsClear: false, gmCondition100: false,
+  groceryEndcapsConditioned: false, groceryWaterFilled: false,
+  storeConditionNotes: '', storeConditionTime: '',
+  closingWalk: false, closingWalkTime: '',
+  gmDoorsLocked: false, gmDoorsLockedTime: '',
+  serviceDrawersPulled: false, serviceDrawersTime: '',
+  gasStationArmed: false, gasStationTime: '',
+  logileComplete: false, logileTime: '',
+  smartsenseComplete: false, smartsenseTime: '',
+  closingTaskNotes: '',
+  recallsComplete: 'n-a', recallSummary: '',
+  floorProjects: '', floorProjectsTime: '',
+  frozenLiveloadPallets: '', produceIncomingOrder: '',
+  complianceStore: '', complianceGasStation: '',
+  keysPassedTo: '', phone611PassedTo: '', timePassed: '',
+  followUps: '', additionalNotes: '',
+};
+
+let bays = Array.from({length:7}, (_, i) => ({bay:i+1, now:'', future:''}));
+let recalls = [];
+let attendanceRows = [];
+let metricRows = [
+  {id:makeId(), metric:'Sales', value:'', updatedAt:''},
+];
+let smartSenseMisses = [];
+let workOrders = [];
+let attachments = [];
+let ocrText = '';
+let copyStatus = '';
+
+// ==================== FIELD UPDATE ====================
+function setField(key, value) {
+  form[key] = value;
+  updatePreview();
+}
+
+// ==================== TABS ====================
+let currentTab = 'overview';
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const tabs = ['overview','import','ops','close','handoff'];
+    b.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  currentTab = name;
+}
+
+// ==================== INIT UI ====================
+function initUI() {
+  // set all form fields
+  for (const [k, v] of Object.entries(form)) {
+    const el = document.getElementById('f-' + k);
+    if (!el) continue;
+    if (el.type === 'checkbox') el.checked = v;
+    else el.value = v;
+  }
+  renderBays();
+  renderMetrics();
+  renderAttendance();
+  renderRecalls();
+  renderAttachments();
+  renderSmartSenseMisses();
+  renderWorkOrders();
+  updatePreview();
+}
+
+// ==================== BAYS ====================
+const bayOptions = ['','Open / Available','Pallet Trailer','GM LL','Paper','Bottles','Vendor','Turkey Trailer','Dairy','Frozen','Produce','Grocery LL','Empty','Other'];
+
+function renderBays() {
+  const grid = document.getElementById('bays-grid');
+  grid.innerHTML = '';
+  bays.forEach((bay, index) => {
+    const div = document.createElement('div');
+    div.className = 'bay-card';
+    div.innerHTML = `
+      <div class="bay-header">
+        <div class="bay-title">Bay ${bay.bay}</div>
+        <div class="bay-badge">Receiving</div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Now</label>
+          <select class="select" onchange="updateBay(${index},'now',this.value)">
+            ${bayOptions.map(o => `<option value="${o}"${bay.now===o?' selected':''}>${o||'Select'}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Future</label>
+          <select class="select" onchange="updateBay(${index},'future',this.value)">
+            ${bayOptions.map(o => `<option value="${o}"${bay.future===o?' selected':''}>${o||'Select'}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function updateBay(index, key, value) {
+  bays[index][key] = value;
+  updatePreview();
+}
+
+// ==================== ATTENDANCE ====================
+function renderAttendance() {
+  const tbody = document.getElementById('attendance-tbody');
+  if (attendanceRows.length === 0) {
+    tbody.innerHTML = '<tr class="td-empty"><td colspan="5">No attendance rows yet. Use the button above.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = attendanceRows.map(row => `
+    <tr>
+      <td><input class="input" value="${esc(row.employee)}" placeholder="Employee" oninput="updateAttendanceRow('${row.id}','employee',this.value)"></td>
+      <td><input class="input" value="${esc(row.department)}" placeholder="Department" oninput="updateAttendanceRow('${row.id}','department',this.value)"></td>
+      <td><input class="input" value="${esc(row.scheduledShift)}" placeholder="1 PM to 9:30 PM" oninput="updateAttendanceRow('${row.id}','scheduledShift',this.value)"></td>
+      <td>
+        <select class="select" onchange="updateAttendanceRow('${row.id}','fmla',this.value)">
+          ${['Yes','No','N/A'].map(o=>`<option${row.fmla===o?' selected':''}>${o}</option>`).join('')}
+        </select>
+      </td>
+      <td><button class="td-btn" onclick="removeAttendanceRow('${row.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td>
+    </tr>
+  `).join('');
+}
+
+function addAttendanceRow() {
+  attendanceRows.push({id:makeId(), employee:'', department:'', scheduledShift:'', fmla:'N/A'});
+  renderAttendance(); updatePreview();
+}
+function updateAttendanceRow(id, key, value) {
+  const r = attendanceRows.find(r=>r.id===id);
+  if (r) r[key] = value;
+  updatePreview();
+}
+function removeAttendanceRow(id) {
+  attendanceRows = attendanceRows.filter(r=>r.id!==id);
+  renderAttendance(); updatePreview();
+}
+
+// ==================== METRICS ====================
+function renderMetrics() {
+  const tbody = document.getElementById('metrics-tbody');
+  tbody.innerHTML = metricRows.map(row => `
+    <tr>
+      <td><input class="input" value="${esc(row.metric)}" placeholder="Metric" oninput="updateMetricRow('${row.id}','metric',this.value)"></td>
+      <td><input class="input" value="${esc(row.value)}" placeholder="Value" oninput="updateMetricRow('${row.id}','value',this.value)"></td>
+      <td><input class="input" type="time" value="${esc(row.updatedAt)}" oninput="updateMetricRow('${row.id}','updatedAt',this.value)"></td>
+      <td><button class="td-btn" onclick="removeMetricRow('${row.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td>
+    </tr>
+  `).join('');
+  updateOverviewChips();
+}
+
+function addMetricRow() {
+  metricRows.push({id:makeId(), metric:'', value:'', updatedAt:''});
+  renderMetrics(); updatePreview();
+}
+function updateMetricRow(id, key, value) {
+  const r = metricRows.find(r=>r.id===id);
+  if (r) r[key] = value;
+  updateOverviewChips(); updatePreview();
+}
+function removeMetricRow(id) {
+  metricRows = metricRows.filter(r=>r.id!==id);
+  renderMetrics(); updatePreview();
+}
+function updateOverviewChips() {
+  const chips = document.getElementById('overview-chips');
+  if (!chips) return;
+  chips.innerHTML = [
+    {label:'Store', value: form.store},
+    {label:'Sales', value: (metricRows.find(r=>r.metric==='Sales')||{}).value || form.salesValue},
+    {label:'OSA', value: (metricRows.find(r=>r.metric==='OSA')||{}).value || form.osa},
+    {label:'Out of Stocks', value: (metricRows.find(r=>r.metric==='Out of Stocks')||{}).value || form.topOosCount},
+  ].map(c=>`<div class="chip"><div class="chip-label">${c.label}</div><div class="chip-value">${c.value||'—'}</div></div>`).join('');
+}
+
+// ==================== RECALLS ====================
+function toggleRecallTable() {
+  document.getElementById('recall-section').style.display = form.recallsComplete === 'yes' ? 'block' : 'none';
+}
+
+// ==================== SMART SENSE MISSES (table) ====================
+const smartSenseLocationOptions = ['Meat', 'Deli', 'Gas Station', 'Other'];
+
+function renderSmartSenseMisses() {
+  const tbody = document.getElementById('smartsense-tbody');
+  if (!tbody) return;
+  if (smartSenseMisses.length === 0) {
+    tbody.innerHTML = '<tr class="td-empty"><td colspan="3">No missed SmartSense logs. Use button above if any were missed.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = smartSenseMisses.map(row => `
+    <tr>
+      <td>
+        <select class="select" onchange="updateSmartSenseMiss('${row.id}','location',this.value)">
+          ${smartSenseLocationOptions.map(o=>`<option${row.location===o?' selected':''}>${o}</option>`).join('')}
+        </select>
+      </td>
+      <td><input class="input" value="${esc(row.log)}" placeholder="Which log was missed and why..." oninput="updateSmartSenseMiss('${row.id}','log',this.value)"></td>
+      <td><button class="td-btn" onclick="removeSmartSenseMiss('${row.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td>
+    </tr>
+  `).join('');
+}
+function addSmartSenseMiss() {
+  smartSenseMisses.push({id:makeId(), location:'Meat', log:''});
+  renderSmartSenseMisses(); updatePreview();
+}
+function updateSmartSenseMiss(id, key, value) {
+  const r = smartSenseMisses.find(r=>r.id===id);
+  if (r) r[key] = value;
+  updatePreview();
+}
+function removeSmartSenseMiss(id) {
+  smartSenseMisses = smartSenseMisses.filter(r=>r.id!==id);
+  renderSmartSenseMisses(); updatePreview();
+}
+
+// ==================== WORK ORDERS ====================
+const woPriorityOptions = ['Low', 'Medium', 'High', 'Emergency'];
+
+function renderWorkOrders() {
+  const tbody = document.getElementById('workorders-tbody');
+  if (workOrders.length === 0) {
+    tbody.innerHTML = '<tr class="td-empty"><td colspan="6">No work orders yet. Click "Add Work Order" to log one.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = workOrders.map(wo => `
+    <tr>
+      <td><input class="input" value="${esc(wo.number)}" placeholder="WO #" oninput="updateWorkOrder('${wo.id}','number',this.value)"></td>
+      <td><input class="input" value="${esc(wo.department)}" placeholder="Dept / Area" oninput="updateWorkOrder('${wo.id}','department',this.value)"></td>
+      <td><input class="input" value="${esc(wo.description)}" placeholder="Issue description" oninput="updateWorkOrder('${wo.id}','description',this.value)"></td>
+      <td>
+        <select class="select" onchange="updateWorkOrder('${wo.id}','priority',this.value)">
+          ${woPriorityOptions.map(p=>`<option${wo.priority===p?' selected':''}>${p}</option>`).join('')}
+        </select>
+      </td>
+      <td><input class="input" value="${esc(wo.submittedBy)}" placeholder="Name" oninput="updateWorkOrder('${wo.id}','submittedBy',this.value)"></td>
+      <td><button class="td-btn" onclick="removeWorkOrder('${wo.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td>
+    </tr>
+  `).join('');
+}
+
+function addWorkOrder() {
+  workOrders.push({id:makeId(), number:'', department:'', description:'', priority:'Low', submittedBy:''});
+  renderWorkOrders(); updatePreview();
+}
+function updateWorkOrder(id, key, value) {
+  const w = workOrders.find(w=>w.id===id);
+  if (w) w[key] = value;
+  updatePreview();
+}
+function removeWorkOrder(id) {
+  workOrders = workOrders.filter(w=>w.id!==id);
+  renderWorkOrders(); updatePreview();
+}
+function renderRecalls() {
+  const tbody = document.getElementById('recalls-tbody');
+  if (recalls.length === 0) {
+    tbody.innerHTML = '<tr class="td-empty"><td colspan="6">No recall rows yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = recalls.map(row => `
+    <tr>
+      <td><input class="input" value="${esc(row.recallId)}" placeholder="ID" oninput="updateRecall('${row.id}','recallId',this.value)"></td>
+      <td><input class="input" value="${esc(row.product)}" placeholder="Product" oninput="updateRecall('${row.id}','product',this.value)"></td>
+      <td><input class="input" value="${esc(row.department)}" placeholder="Dept" oninput="updateRecall('${row.id}','department',this.value)"></td>
+      <td><input class="input" value="${esc(row.actionTaken)}" placeholder="Action" oninput="updateRecall('${row.id}','actionTaken',this.value)"></td>
+      <td><input class="input" value="${esc(row.completedBy)}" placeholder="Name" oninput="updateRecall('${row.id}','completedBy',this.value)"></td>
+      <td><button class="td-btn" onclick="removeRecall('${row.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td>
+    </tr>
+  `).join('');
+}
+function addRecall() {
+  recalls.push({id:makeId(), recallId:'', product:'', department:'', actionTaken:'', completedBy:''});
+  renderRecalls(); updatePreview();
+}
+function updateRecall(id, key, value) {
+  const r = recalls.find(r=>r.id===id);
+  if (r) r[key] = value;
+  updatePreview();
+}
+function removeRecall(id) {
+  recalls = recalls.filter(r=>r.id!==id);
+  renderRecalls(); updatePreview();
+}
+
+// ==================== ATTACHMENTS ====================
+const imageCategoryOptions = ['General','PowerBI','OSA','Dock','Bottle Room','Baler','Store Conditions','Other'];
+
+function handleAttachmentUpload(e) {
+  const files = Array.from(e.target.files || []);
+  files.forEach(file => {
+    attachments.push({
+      id: makeId(), name: file.name, category: 'General', note: '',
+      previewUrl: URL.createObjectURL(file), type: file.type,
+    });
+  });
+  renderAttachments(); updatePreview();
+  e.target.value = '';
+}
+function renderAttachments() {
+  const grid = document.getElementById('attachments-grid');
+  grid.innerHTML = '';
+  attachments.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'attachment-item';
+    div.innerHTML = `
+      <div class="attachment-preview">
+        ${item.type.startsWith('image/') ? `<img src="${item.previewUrl}" alt="${esc(item.name)}">` : '<div class="no-preview">Preview unavailable</div>'}
+      </div>
+      <input class="input" value="${esc(item.name)}" readonly style="margin-bottom:6px;">
+      <select class="select" onchange="updateAttachment('${item.id}','category',this.value)" style="margin-bottom:6px;">
+        ${imageCategoryOptions.map(o=>`<option${item.category===o?' selected':''}>${o}</option>`).join('')}
+      </select>
+      <input class="input" value="${esc(item.note)}" placeholder="Note about this image" oninput="updateAttachment('${item.id}','note',this.value)" style="margin-bottom:6px;">
+      <button class="btn" onclick="removeAttachment('${item.id}')" style="width:100%;justify-content:center;font-size:12px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Remove
+      </button>
+    `;
+    grid.appendChild(div);
+  });
+}
+function updateAttachment(id, key, value) {
+  const a = attachments.find(a=>a.id===id);
+  if (a) a[key] = value;
+  updatePreview();
+}
+function removeAttachment(id) {
+  const a = attachments.find(a=>a.id===id);
+  if (a?.previewUrl) URL.revokeObjectURL(a.previewUrl);
+  attachments = attachments.filter(a=>a.id!==id);
+  renderAttachments(); updatePreview();
+}
+
+// ==================== PRESETS ====================
+function applyPreset(mode) {
+  form.shift = 'Closing';
+  form.attendance = mode==='normal' ? 'None reported' : mode==='busy' ? 'Short staffed but close completed.' : 'Call off or operational staffing issues impacted close.';
+  form.overallCloseStatus = mode==='normal' ? 'Good' : mode==='busy' ? 'Good with Follow Ups' : 'Needs Overnight Attention';
+  form.bottleRoomStatus = mode==='normal' ? 'Closed' : mode==='busy' ? 'Trash removed' : form.bottleRoomStatus;
+  form.balerStatus = mode==='problem' ? 'Almost full' : 'Normal operation';
+  form.trailerReadiness = mode==='normal' ? 'Ready' : mode==='busy' ? 'Needs attention' : 'Not ready';
+  form.hallwayArea = 'Produce / Frozen Hallway';
+  form.hallwayStatus = mode==='normal' ? 'Clear' : mode==='busy' ? 'Partially blocked' : 'Blocked';
+  form.centralSupplyStatus = mode==='normal' ? 'Clean' : mode==='busy' ? 'Needs cleanup' : 'Overflowing';
+  form.palletTruckStatus = mode==='problem' ? 'Not available' : 'Available';
+  form.receivingClear = mode !== 'problem';
+  form.receivingIssues = mode !== 'normal';
+  form.parkingLotClear = mode !== 'problem';
+  form.cartCorralsClear = mode !== 'problem';
+  form.closingWalk = true; form.gmDoorsLocked = true;
+  form.serviceDrawersPulled = true; form.gasStationArmed = true;
+  form.logileComplete = true; form.smartsenseComplete = true;
+  initUI();
+}
+
+function resetAll() {
+  attachments.forEach(a => { if(a.previewUrl) URL.revokeObjectURL(a.previewUrl); });
+  form = {
+    date:todayStr, store:'260', closingLeader:'', shift:'Closing',
+    overallCloseStatus:'Good', overallCloseNote:'',
+    salesHeadline:'PowerBI last update:', salesValue:'', osa:'', topOosCount:'',
+    attendance:'', aiSummary:'', issues:'',
+    bottleRoomStatus:'', bottleRoomNotes:'', bottleRoomTime:'',
+    balerStatus:'', balerNotes:'', balerTime:'',
+    dept99Status:'', dept99Notes:'', dept99Time:'',
+    trailerReadiness:'', trailerReadinessTime:'',
+    hallwayArea:'Produce / Frozen Hallway', hallwayStatus:'', hallwayTime:'',
+    centralSupplyStatus:'', centralSupplyTime:'',
+    palletTruckStatus:'', palletTruckTime:'',
+    dockSummary:'', receivingNotes:'', receivingClear:false, receivingIssues:false,
+    parkingLotClear:false, cartCorralsClear:false, gmCondition100:false,
+    storeConditionNotes:'', storeConditionTime:'',
+    closingWalk:false, closingWalkTime:'',
+    gmDoorsLocked:false, gmDoorsLockedTime:'',
+    serviceDrawersPulled:false, serviceDrawersTime:'',
+    gasStationArmed:false, gasStationTime:'',
+    logileComplete:false, logileTime:'',
+    smartsenseComplete:false, smartsenseTime:'',
+    closingTaskNotes:'',
+    recallsComplete:'n-a', recallSummary:'',
+    floorProjects:'', floorProjectsTime:'',
+    frozenLiveloadPallets:'', produceIncomingOrder:'',
+    complianceStore:'', complianceGasStation:'',
+    parkingLotClear:false, cartCorralsClear:false, gmCondition100:false,
+    groceryEndcapsConditioned:false, groceryWaterFilled:false,
+    keysPassedTo:'', phone611PassedTo:'', timePassed:'',
+    followUps:'', additionalNotes:'',
+  };
+  bays = Array.from({length:7}, (_,i)=>({bay:i+1, now:'', future:''}));
+  recalls = []; attendanceRows = []; attachments = []; workOrders = []; smartSenseMisses = [];
+  metricRows = [
+    {id:makeId(), metric:'Sales', value:'', updatedAt:''},
+  ];
+  ocrText = '';
+  document.getElementById('ocr-textarea').value = '';
+  document.getElementById('import-label').textContent = 'Choose screenshot';
+  document.getElementById('ocr-status').textContent = 'Upload your PowerBI or OSA screenshot here.';
+  document.getElementById('recall-section').style.display = 'none';
+  localStorage.removeItem(SAVE_KEY);
+  initUI();
+}
+
+// ==================== OCR / IMPORT ====================
+async function handleImageUpload(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  document.getElementById('import-label').textContent = `Selected: ${file.name}`;
+  document.getElementById('ocr-status').textContent = 'Running OCR now...';
+  try {
+    const result = await Tesseract.recognize(file, 'eng', {logger: m => {}});
+    const text = result.data?.text || '';
+    ocrText = text;
+    document.getElementById('ocr-textarea').value = text;
+    document.getElementById('ocr-status').textContent = 'Image ready. OCR text shown below.';
+    applyParsed(parsePowerBiText(text));
+  } catch (err) {
+    document.getElementById('ocr-status').textContent = 'OCR failed. You can still paste text manually below.';
+  }
+}
+
+function parsePowerBiText(text) {
+  const clean = String(text||'').replace(/\s+/g,' ');
+  const salesMatch = clean.match(/(?:Sales\s*\$|Total\s*\$|Sales)\s*\$?([\d,]+(?:\.\d+)?)/i) ||
+    clean.match(/Hourly Sales Overview.*?\$([\d,]+(?:\.\d+)?)/i) ||
+    clean.match(/\bTotal\b.*?\$([\d,]+(?:\.\d+)?)/i);
+  const osaMatch = clean.match(/OSA\s*%\s*Ops.*?Yesterday\s+([\d.]+)%/i) ||
+    clean.match(/\bYesterday\b\s+([\d.]+)%\s+[\d.]+%/i) ||
+    clean.match(/\bTotal\s+([\d.]+)%\s+[\d.]+%/i);
+  const oosMatch = clean.match(/Out of Stocks\s+(\d[\d,]*)/i) ||
+    clean.match(/Out\s*of\s*Stocks.*?(\d[\d,]*)/i);
+  const topItems = [];
+  const lines = String(text||'').split(/\n+/).map(l=>l.trim()).filter(Boolean);
+  for (const line of lines) {
+    if (/strawberries|blueberries|grapes|ground beef|water 24pk|romaine|fruit punch|cheez[ -]?it|coffee|hearts 3 pk|frozen/i.test(line)) {
+      topItems.push(line);
+      if (topItems.length >= 5) break;
+    }
+  }
+  return {
+    salesValue: salesMatch ? `$${salesMatch[1]}` : '',
+    osa: osaMatch ? `${osaMatch[1]}%` : '',
+    topOosCount: oosMatch ? oosMatch[1] : '',
+    aiSummary: [
+      salesMatch ? `Imported sales ${salesMatch[1]}` : '',
+      osaMatch ? `Imported OSA ${osaMatch[1]}%` : '',
+      oosMatch ? `Imported out of stocks ${oosMatch[1]}` : '',
+    ].filter(Boolean).join(' • '),
+    topItems,
+  };
+}
+
+function applyParsed(parsed) {
+  if (parsed.salesValue) form.salesValue = parsed.salesValue;
+  if (parsed.osa) form.osa = parsed.osa;
+  if (parsed.topOosCount) form.topOosCount = parsed.topOosCount;
+  if (parsed.aiSummary) form.aiSummary = parsed.aiSummary;
+  if (parsed.topItems.length) form.topItemsNotes = parsed.topItems.join('\n');
+  // sync metric rows
+  metricRows = metricRows.map(r => {
+    if (r.metric==='Sales' && parsed.salesValue) return {...r, value:parsed.salesValue};
+    if (r.metric==='OSA' && parsed.osa) return {...r, value:parsed.osa};
+    if (r.metric==='Out of Stocks' && parsed.topOosCount) return {...r, value:parsed.topOosCount};
+    return r;
+  });
+  if (parsed.aiSummary && !metricRows.find(r=>r.metric==='AI Import Summary')) {
+    metricRows.push({id:makeId(), metric:'AI Import Summary', value:parsed.aiSummary, updatedAt:''});
+  }
+  initUI();
+}
+
+function applyPastedText() {
+  ocrText = document.getElementById('ocr-textarea').value;
+  applyParsed(parsePowerBiText(ocrText));
+}
+
+// ==================== OUTPUT GENERATION ====================
+function esc(v) {
+  return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function splitLines(v) {
+  return String(v||'').split('\n').map(l=>l.trim()).filter(Boolean);
+}
+
+function buildHtmlInner() {
+  const renderList = items => items.filter(Boolean).map(i=>`<tr><td style="padding:0 0 4px 14px;vertical-align:top;">• ${esc(i)}</td></tr>`).join('');
+  const section = (title, items) => items.filter(Boolean).length ?
+    `<tr><td style="padding:10px 0 4px 0;font-weight:700;text-decoration:underline;">${esc(title)}</td></tr>${renderList(items)}` : '';
+
+  const activeAttRows = attendanceRows.filter(r=>r.employee||r.department||r.scheduledShift||(r.fmla&&r.fmla!=='N/A'));
+  const activeMetRows = metricRows.filter(r=>r.metric||r.value||r.updatedAt);
+  const activeAtts = attachments.filter(a=>a.name||a.note||a.category);
+
+  const bayRows = bays.filter(b=>b.now||b.future).map(b=>
+    `<tr><td style="border:1px solid #d8e1ef;padding:7px 8px;">Bay ${b.bay}</td><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(b.now||'—')}</td><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(b.future||'')}</td></tr>`
+  ).join('');
+
+  const recallRows = recalls.map(r=>
+    `<tr><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(r.recallId)}</td><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(r.product)}</td><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(r.department)}</td><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(r.actionTaken)}</td><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(r.completedBy)}</td></tr>`
+  ).join('');
+
+  const attRows = activeAtts.map(a=>
+    `<tr><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(a.category||'General')}</td><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(a.name)}</td><td style="border:1px solid #d8e1ef;padding:7px 8px;">${esc(a.note||'')}</td></tr>`
+  ).join('');
+
+  const th = 'border:1px solid #d8e1ef;padding:7px 8px;background:#f4f7fb;text-align:left;';
+  const td = 'border:1px solid #d8e1ef;padding:7px 8px;';
+
+  // Dynamic title: date - Close
+  const dateTitle = form.date ? `${form.date} - Close` : `SHIFT HANDOFF REPORT`;
+
+  // SmartSense misses — only include if any rows
+  const smartSenseMissedSection = smartSenseMisses.length
+    ? `<tr><td style="padding:10px 0 4px 0;font-weight:700;text-decoration:underline;">Missed SmartSense</td></tr>
+       <tr><td style="padding:0 0 10px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111827;">
+       <tr><th style="${th}">Location</th><th style="${th}">Log / Reason</th></tr>
+       ${smartSenseMisses.map(r=>`<tr><td style="${td}">${esc(r.location)}</td><td style="${td}">${esc(r.log)}</td></tr>`).join('')}
+       </table></td></tr>`
+    : '';
+
+  // Load quantities — only include if filled
+  const loadQtyItems = [
+    form.frozenLiveloadPallets ? `Frozen Liveload: ${form.frozenLiveloadPallets} pallets` : '',
+    form.produceIncomingOrder ? `Produce Incoming: ${form.produceIncomingOrder}` : '',
+  ].filter(Boolean);
+
+  // Compliance — only include if filled
+  const complianceItems = [
+    form.complianceStore ? `Store: ${form.complianceStore}` : '',
+    form.complianceGasStation ? `Gas Station: ${form.complianceGasStation}` : '',
+  ].filter(Boolean);
+
+  return `
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11pt;line-height:1.45;color:#111827;">
+  <tr><td style="padding:0 0 6px 0;font-weight:700;">${esc(dateTitle)}</td></tr>
+  <tr><td style="padding:0 0 2px 0;">Store ${esc(form.store)}${form.closingLeader?` &nbsp;|&nbsp; Closing Leader: ${esc(form.closingLeader)}`:''}</td></tr>
+  ${activeAttRows.length?`<tr><td style="padding:10px 0 4px 0;font-weight:700;text-decoration:underline;">Attendance / Call Offs</td></tr>
+  <tr><td style="padding:0 0 10px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111827;">
+  <tr><th style="${th}">Employee</th><th style="${th}">Department</th><th style="${th}">Scheduled Shift</th><th style="${th}">FMLA</th></tr>
+  ${activeAttRows.map(r=>`<tr><td style="${td}">${esc(r.employee)}</td><td style="${td}">${esc(r.department)}</td><td style="${td}">${esc(r.scheduledShift)}</td><td style="${td}">${esc(r.fmla||'N/A')}</td></tr>`).join('')}
+  </table></td></tr>`:section('Attendance / Call Offs', splitLines(form.attendance))}
+  ${activeMetRows.length?`<tr><td style="padding:10px 0 4px 0;font-weight:700;text-decoration:underline;">Store Metrics</td></tr>
+  <tr><td style="padding:0 0 10px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111827;">
+  <tr><th style="${th}">Metric</th><th style="${th}">Value</th><th style="${th}">Last Updated</th></tr>
+  ${activeMetRows.map(r=>`<tr><td style="${td}">${esc(r.metric)}</td><td style="${td}">${esc(r.value)}</td><td style="${td}">${esc(fmtTime(r.updatedAt)||r.updatedAt)}</td></tr>`).join('')}
+  </table></td></tr>`:''}
+  ${bayRows?`<tr><td style="padding:10px 0 4px 0;font-weight:700;text-decoration:underline;">Receiving / Bay Status</td></tr>
+  <tr><td style="padding:0 0 10px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111827;">
+  <tr><th style="${th}">Bay</th><th style="${th}">Now</th><th style="${th}">Future</th></tr>${bayRows}</table></td></tr>`:''}
+  ${section('Backroom / Receiving', [
+    form.trailerReadiness?`Trailer Readiness: ${form.trailerReadiness}${form.trailerReadinessTime?` | Time: ${fmtTime(form.trailerReadinessTime)}`:''}`:'' ,
+    form.hallwayStatus?`${form.hallwayArea||'Hallway'}: ${form.hallwayStatus}${form.hallwayTime?` | Time: ${fmtTime(form.hallwayTime)}`:''}`:'' ,
+    form.centralSupplyStatus?`Central Supply: ${form.centralSupplyStatus}${form.centralSupplyTime?` | Time: ${fmtTime(form.centralSupplyTime)}`:''}`:'' ,
+    form.palletTruckStatus?`Pallet Truck: ${form.palletTruckStatus}${form.palletTruckTime?` | Time: ${fmtTime(form.palletTruckTime)}`:''}`:'' ,
+    form.dockSummary, ...splitLines(form.receivingNotes)
+  ])}
+  ${loadQtyItems.length ? section('Load Quantities', loadQtyItems) : ''}
+  ${section('Bottle Room', [form.bottleRoomStatus?`${form.bottleRoomStatus}${form.bottleRoomTime?` | Time: ${fmtTime(form.bottleRoomTime)}`:''}`:'', ...splitLines(form.bottleRoomNotes)])}
+  ${section('Baler', [form.balerStatus?`${form.balerStatus}${form.balerTime?` | Time: ${fmtTime(form.balerTime)}`:''}${form.balerNotes?` | ${form.balerNotes}`:''}`:''])}
+  ${section('Compactor / Trash', [form.dept99Status?`${form.dept99Status}${form.dept99Time?` ${fmtTime(form.dept99Time)}`:''}${form.dept99Notes?` | ${form.dept99Notes}`:''}`:''])}
+  ${section('Store Conditions', [
+    form.parkingLotClear?'Parking lot clear':'',
+    form.cartCorralsClear?'Cart corrals clear':'',
+    form.gmCondition100?'GM department conditioned to 100%':'',
+    form.groceryEndcapsConditioned?'Grocery Endcaps / Center Aisle Conditioned':'',
+    form.groceryWaterFilled?'Grocery Water Filled':'',
+    form.storeConditionTime?`Conditions time: ${fmtTime(form.storeConditionTime)}`:'',
+    ...splitLines(form.storeConditionNotes)
+  ])}
+  ${section('Closing Tasks Completed', [
+    form.closingWalk?`Closing walk completed${form.closingWalkTime?` | ${fmtTime(form.closingWalkTime)}`:''}`:'' ,
+    form.gmDoorsLocked?`GM doors locked and alarmed${form.gmDoorsLockedTime?` | ${fmtTime(form.gmDoorsLockedTime)}`:''}`:'' ,
+    form.serviceDrawersPulled?`Service drawers pulled${form.serviceDrawersTime?` | ${fmtTime(form.serviceDrawersTime)}`:''}`:'' ,
+    form.gasStationArmed?`Gas station armed${form.gasStationTime?` | ${fmtTime(form.gasStationTime)}`:''}`:'' ,
+    form.logileComplete?`Logile checklist completed${form.logileTime?` | ${fmtTime(form.logileTime)}`:''}`:'' ,
+    form.smartsenseComplete?`Smartsense completed${form.smartsenseTime?` | ${fmtTime(form.smartsenseTime)}`:''}`:'' ,
+    ...splitLines(form.closingTaskNotes)
+  ])}
+  ${smartSenseMissedSection}
+  ${complianceItems.length ? section('Compliance', complianceItems) : ''}
+  ${section('Floor Projects', [form.floorProjects?`${form.floorProjects}${form.floorProjectsTime?` | Time: ${fmtTime(form.floorProjectsTime)}`:''}`:'' ])}
+  ${section('Recall Status', [form.recallsComplete==='yes'?'Recalls completed':form.recallsComplete==='no'?'Recalls not complete':'N/A', ...splitLines(form.recallSummary)])}
+  ${recallRows?`<tr><td style="padding:10px 0 4px 0;font-weight:700;text-decoration:underline;">Recall Log</td></tr>
+  <tr><td style="padding:0 0 10px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111827;">
+  <tr><th style="${th}">Recall ID</th><th style="${th}">Product</th><th style="${th}">Department</th><th style="${th}">Action Taken</th><th style="${th}">Completed By</th></tr>${recallRows}</table></td></tr>`:''}
+  ${workOrders.length?`<tr><td style="padding:10px 0 4px 0;font-weight:700;text-decoration:underline;">Work Orders</td></tr>
+  <tr><td style="padding:0 0 10px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111827;">
+  <tr><th style="${th}">WO #</th><th style="${th}">Department</th><th style="${th}">Description</th><th style="${th}">Priority</th><th style="${th}">Submitted By</th></tr>
+  ${workOrders.map(w=>`<tr><td style="${td}">${esc(w.number)}</td><td style="${td}">${esc(w.department)}</td><td style="${td}">${esc(w.description)}</td><td style="${td}">${esc(w.priority)}</td><td style="${td}">${esc(w.submittedBy)}</td></tr>`).join('')}
+  </table></td></tr>`:''}
+  ${attRows?`<tr><td style="padding:10px 0 4px 0;font-weight:700;text-decoration:underline;">Images / Attachments</td></tr>
+  <tr><td style="padding:0 0 10px 0;"><table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111827;">
+  <tr><th style="${th}">Category</th><th style="${th}">File</th><th style="${th}">Note</th></tr>${attRows}</table></td></tr>`:''}
+  ${section('Handoff', [
+    form.keysPassedTo?`Keys: ${form.keysPassedTo}`:'',
+    form.phone611PassedTo?`611: ${form.phone611PassedTo}`:'',
+    form.timePassed?`Time Passed: ${fmtTime(form.timePassed)}`:'',
+  ])}
+  ${section('Follow Ups For Next Shift', splitLines(form.followUps))}
+  ${section('Additional Notes', splitLines(form.additionalNotes))}
+</table>`.trim();
+}
+
+
+function buildPlainOutput() {
+  const lines = [];
+  const pushSection = (title, items) => {
+    const clean = items.filter(Boolean);
+    if (!clean.length) return;
+    lines.push(`${title}:`);
+    clean.forEach(i => lines.push(`• ${i}`));
+    lines.push('');
+  };
+  const activeAttRows = attendanceRows.filter(r=>r.employee||r.department||r.scheduledShift);
+  const activeMetRows = metricRows.filter(r=>r.metric||r.value||r.updatedAt);
+  const activeAtts = attachments.filter(a=>a.name||a.note||a.category);
+
+  const dateTitle = form.date ? `${form.date} - Close` : 'SHIFT HANDOFF REPORT';
+  lines.push(dateTitle);
+  lines.push(`Store ${form.store}${form.closingLeader?` | Closing Leader: ${form.closingLeader}`:''}`);
+  lines.push('');
+
+  if (activeAttRows.length) {
+    lines.push('Attendance / Call Offs:');
+    activeAttRows.forEach(r => lines.push(`• ${r.employee||'Employee'} | ${r.department||'Department'} | ${r.scheduledShift||'Shift'} | FMLA: ${r.fmla||'N/A'}`));
+    lines.push('');
+  } else { pushSection('Attendance / Call Offs', splitLines(form.attendance)); }
+
+  if (activeMetRows.length) {
+    lines.push('Store Metrics:');
+    activeMetRows.forEach(r => lines.push(`• ${r.metric}: ${r.value}${r.updatedAt?` | Updated: ${fmtTime(r.updatedAt)||r.updatedAt}`:''}`));
+    lines.push('');
+  }
+
+  const activeBays = bays.filter(b=>b.now||b.future);
+  if (activeBays.length) {
+    lines.push('Receiving / Bay Status:');
+    activeBays.forEach(b => lines.push(`• Bay ${b.bay}: ${b.now||'—'}${b.future?` → ${b.future}`:''}`));
+    lines.push('');
+  }
+  pushSection('Backroom / Receiving', [
+    form.trailerReadiness?`Trailer Readiness: ${form.trailerReadiness}${form.trailerReadinessTime?` | Time: ${fmtTime(form.trailerReadinessTime)}`:''}`:'' ,
+    form.hallwayStatus?`${form.hallwayArea||'Hallway'}: ${form.hallwayStatus}${form.hallwayTime?` | Time: ${fmtTime(form.hallwayTime)}`:''}`:'' ,
+    form.centralSupplyStatus?`Central Supply: ${form.centralSupplyStatus}${form.centralSupplyTime?` | Time: ${fmtTime(form.centralSupplyTime)}`:''}`:'' ,
+    form.palletTruckStatus?`Pallet Truck: ${form.palletTruckStatus}${form.palletTruckTime?` | Time: ${fmtTime(form.palletTruckTime)}`:''}`:'' ,
+    form.dockSummary, ...splitLines(form.receivingNotes)
+  ]);
+  pushSection('Load Quantities', [
+    form.frozenLiveloadPallets?`Frozen Liveload: ${form.frozenLiveloadPallets} pallets`:'',
+    form.produceIncomingOrder?`Produce Incoming: ${form.produceIncomingOrder}`:'',
+  ]);
+  pushSection('Bottle Room', [form.bottleRoomStatus?`${form.bottleRoomStatus}${form.bottleRoomTime?` | Time: ${fmtTime(form.bottleRoomTime)}`:''}`:'', ...splitLines(form.bottleRoomNotes)]);
+  pushSection('Baler', [form.balerStatus?`${form.balerStatus}${form.balerTime?` | Time: ${fmtTime(form.balerTime)}`:''}${form.balerNotes?` | ${form.balerNotes}`:''}`:'']);
+  pushSection('Compactor / Trash', [form.dept99Status?`${form.dept99Status}${form.dept99Time?` ${fmtTime(form.dept99Time)}`:''}${form.dept99Notes?` | ${form.dept99Notes}`:''}`:'']);
+  pushSection('Store Conditions', [
+    form.parkingLotClear?'Parking lot clear':'',
+    form.cartCorralsClear?'Cart corrals clear':'',
+    form.gmCondition100?'GM department conditioned to 100%':'',
+    form.groceryEndcapsConditioned?'Grocery Endcaps / Center Aisle Conditioned':'',
+    form.groceryWaterFilled?'Grocery Water Filled':'',
+    form.storeConditionTime?`Conditions time: ${fmtTime(form.storeConditionTime)}`:'',
+    ...splitLines(form.storeConditionNotes)
+  ]);
+  pushSection('Closing Tasks Completed', [
+    form.closingWalk?`Closing walk completed${form.closingWalkTime?` | ${fmtTime(form.closingWalkTime)}`:''}`:'' ,
+    form.gmDoorsLocked?`GM doors locked and alarmed${form.gmDoorsLockedTime?` | ${fmtTime(form.gmDoorsLockedTime)}`:''}`:'' ,
+    form.serviceDrawersPulled?`Service drawers pulled${form.serviceDrawersTime?` | ${fmtTime(form.serviceDrawersTime)}`:''}`:'' ,
+    form.gasStationArmed?`Gas station armed${form.gasStationTime?` | ${fmtTime(form.gasStationTime)}`:''}`:'' ,
+    form.logileComplete?`Logile checklist completed${form.logileTime?` | ${fmtTime(form.logileTime)}`:''}`:'' ,
+    form.smartsenseComplete?`Smartsense completed${form.smartsenseTime?` | ${fmtTime(form.smartsenseTime)}`:''}`:'' ,
+    ...splitLines(form.closingTaskNotes)
+  ]);
+  if (smartSenseMisses.length) {
+    lines.push('Missed SmartSense:');
+    smartSenseMisses.forEach(r => lines.push(`• ${r.location}${r.log?` | ${r.log}`:''}`));
+    lines.push('');
+  }
+  const compLines = [
+    form.complianceStore?`Store: ${form.complianceStore}`:'',
+    form.complianceGasStation?`Gas Station: ${form.complianceGasStation}`:'',
+  ].filter(Boolean);
+  if (compLines.length) pushSection('Compliance', compLines);
+  pushSection('Floor Projects', [form.floorProjects?`${form.floorProjects}${form.floorProjectsTime?` | Time: ${fmtTime(form.floorProjectsTime)}`:''}`:'' ]);
+  pushSection('Recall Status', [form.recallsComplete==='yes'?'Recalls completed':form.recallsComplete==='no'?'Recalls not complete':'N/A', ...splitLines(form.recallSummary)]);
+  if (form.recallsComplete==='yes' && recalls.length) {
+    lines.push('Recall Log:');
+    recalls.forEach(r => lines.push(`• ${r.recallId} | ${r.product} | ${r.department} | ${r.actionTaken} | ${r.completedBy}`));
+    lines.push('');
+  }
+  if (workOrders.length) {
+    lines.push('Work Orders:');
+    workOrders.forEach(w => lines.push(`• WO#${w.number} | ${w.department} | ${w.description} | Priority: ${w.priority}${w.submittedBy?` | By: ${w.submittedBy}`:''}`));
+    lines.push('');
+  }
+  if (activeAtts.length) {
+    lines.push('Images / Attachments:');
+    activeAtts.forEach(a => lines.push(`• ${a.category||'General'}: ${a.name}${a.note?` | ${a.note}`:''}`));
+    lines.push('');
+  }
+  pushSection('Handoff', [
+    form.keysPassedTo?`Keys: ${form.keysPassedTo}`:'',
+    form.phone611PassedTo?`611: ${form.phone611PassedTo}`:'',
+    form.timePassed?`Time Passed: ${fmtTime(form.timePassed)}`:'',
+  ]);
+  pushSection('Follow Ups For Next Shift', splitLines(form.followUps));
+  pushSection('Additional Notes', splitLines(form.additionalNotes));
+  return lines.join('\n').trim();
+}
+
+// ==================== PREVIEW ====================
+let lastHtmlInner = '';
+let lastPlain = '';
+
+function updatePreview() {
+  lastHtmlInner = buildHtmlInner();
+  lastPlain = buildPlainOutput();
+  document.getElementById('preview-box').innerHTML = lastHtmlInner;
+  document.getElementById('rich-copy-box').innerHTML = lastHtmlInner;
+  document.getElementById('plain-copy-box').value = lastPlain;
+  updatePreviewChips();
+  scheduleSave();
+}
+
+function updatePreviewChips() {
+  const chips = document.getElementById('preview-chips');
+  const salesRow = metricRows.find(r=>r.metric==='Sales');
+  const salesVal = salesRow?.value || '—';
+  chips.innerHTML = `
+    <div class="chip"><div class="chip-label">Sales</div><div class="chip-value">${salesVal}</div></div>
+    <div class="chip"><div class="chip-label">Imported</div><div class="chip-value" style="font-size:12px;">${form.aiSummary||'Manual'}</div></div>
+  `;
+}
+
+function selectRichBox() {
+  const el = document.getElementById('rich-copy-box');
+  try {
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } catch(e) {}
+}
+
+// ==================== COPY ====================
+function showCopyStatus(msg, ms=1500) {
+  const el = document.getElementById('copy-status');
+  el.textContent = msg;
+  setTimeout(() => { el.textContent = 'Ready'; }, ms);
+}
+function showCopyError(msg) {
+  const el = document.getElementById('copy-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideCopyError() {
+  document.getElementById('copy-error').style.display = 'none';
+}
+
+async function copyFormatted() {
+  hideCopyError();
+  const fullHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#fff;">${lastHtmlInner}</body></html>`;
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([fullHtml], {type:'text/html'}),
+          'text/plain': new Blob([lastPlain], {type:'text/plain'}),
+        })
+      ]);
+      showCopyStatus('Formatted copied ✓');
+      return;
+    }
+  } catch(e) {}
+  // fallback
+  try {
+    const wrap = document.createElement('div');
+    wrap.contentEditable = 'true';
+    wrap.style.cssText = 'position:fixed;left:-9999px;top:0;white-space:normal;';
+    wrap.innerHTML = lastHtmlInner;
+    document.body.appendChild(wrap);
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(wrap);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('copy');
+    sel.removeAllRanges();
+    document.body.removeChild(wrap);
+    showCopyStatus('Formatted copied ✓');
+  } catch(e) {
+    showCopyError('Rich clipboard blocked. Use the Manual Rich Copy Box above — click inside it and press Ctrl+A, Ctrl+C.');
+  }
+}
+
+async function copyPlain() {
+  hideCopyError();
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(lastPlain);
+      showCopyStatus('Plain copied ✓');
+      return;
+    }
+    throw new Error('no clipboard');
+  } catch(e) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = lastPlain;
+      ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showCopyStatus('Plain copied ✓');
+    } catch(e2) {
+      showCopyError('Clipboard blocked. Click the plain text box above, select all, and copy manually.');
+    }
+  }
+}
+
+// ==================== AUTO-SAVE ====================
+const SAVE_KEY = 'meijer_shift_handoff_v1';
+let saveTimer = null;
+
+function saveToStorage() {
+  try {
+    const data = {
+      form, bays, recalls, attendanceRows, metricRows, workOrders, smartSenseMisses,
+      attachmentsMeta: attachments.map(({id, name, category, note, type}) => ({id, name, category, note, type})),
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    setSaveStatus('saved');
+  } catch(e) {
+    setSaveStatus('error');
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (data.form) Object.assign(form, data.form);
+    if (data.bays) bays = data.bays;
+    if (data.recalls) recalls = data.recalls;
+    if (data.attendanceRows) attendanceRows = data.attendanceRows;
+    if (data.metricRows) metricRows = data.metricRows;
+    if (data.workOrders) workOrders = data.workOrders;
+    if (data.smartSenseMisses) smartSenseMisses = data.smartSenseMisses;
+    // attachments: restore metadata only, images won't persist (blob URLs are session-only)
+    // attachments array left empty — user will re-attach images if needed
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+function setSaveStatus(state) {
+  const el = document.getElementById('save-indicator');
+  const txt = document.getElementById('save-text');
+  if (!el || !txt) return;
+  if (state === 'saving') {
+    el.className = 'save-indicator saving';
+    txt.textContent = 'Saving…';
+  } else if (state === 'saved') {
+    el.className = 'save-indicator';
+    txt.textContent = 'Auto-saved';
+  } else {
+    el.className = 'save-indicator saving';
+    txt.textContent = 'Save error';
+  }
+}
+
+function scheduleSave() {
+  setSaveStatus('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToStorage, 800);
+}
+
+// ==================== INIT ====================
+// Try to restore from localStorage first
+const hadSavedData = loadFromStorage();
+initUI();
+if (hadSavedData) {
+  setSaveStatus('saved');
+  // Show a brief toast so the user knows data was restored
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+  toast.textContent = '✓ Restored your last session';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+</script>
+</body>
+</html>
